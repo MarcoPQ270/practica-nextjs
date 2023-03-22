@@ -7,8 +7,6 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Swal from 'sweetalert2'
 
-
-
 const LoginPage = () => {
   const router = useRouter()
   const [email, setEmail] = useState('')
@@ -39,15 +37,14 @@ const LoginPage = () => {
   }
 
   const checkIfUserIsLoggedIn = () => {
-    // Aquí iría tu código para verificar si el usuario ya inició sesión
-    // Deberías devolver true si el usuario ya inició sesión y false si no
+    // Código para verificar si el usuario ya inició sesión
+    // Devolver true si el usuario ya inició sesión y false si no
     return false
   }
 
   const authenticateUser = async (email, password) => {
    if(email && password){
-    const emailRegex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
-    //Se muestra un texto a modo de ejemplo, luego va a ser un icono
+    const emailRegex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i
     if (emailRegex.test(email)) {
      return true
     } else {
