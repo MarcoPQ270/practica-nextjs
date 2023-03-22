@@ -1,11 +1,26 @@
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import Head from 'next/head'
-import Image from 'next/image'
 import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
+  const router = useRouter()
+  useEffect(() => {
+    // Verificar si el usuario ya inició sesión
+    const isLoggedIn = checkIfUserIsLoggedIn()
+    isLoggedIn ?  router.push('/') :  router.push('/login')
+  }, [])
+
+  const checkIfUserIsLoggedIn = () => {
+    if(localStorage.getItem('sessionToken')){
+      return true
+    }else{
+      return false
+    }
+  }
+
   return (
     <>
       <Head>

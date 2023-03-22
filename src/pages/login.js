@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import Grid from '@mui/material/Grid'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
+import {Button, TextField, Grid, Card, CardContent, Typography } from '@mui/material'
 import Swal from 'sweetalert2'
 
 const LoginPage = () => {
@@ -15,103 +11,117 @@ const LoginPage = () => {
   useEffect(() => {
     // Verificar si el usuario ya inició sesión
     const isLoggedIn = checkIfUserIsLoggedIn()
-
-    if (isLoggedIn) {
-      // Si ya inició sesión, redirigir al usuario a la página principal
-      router.push('/')
-    }
+    isLoggedIn ?  router.push('/') :  router.push('/login')
   }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
-    // Autenticar al usuario
     const isAuthenticated = await authenticateUser(email, password)
-
-    if (isAuthenticated) {
-      // Si la autenticación es exitosa, redirigir al usuario a la página principal
-      router.push('/')
-    } else {
-      
-    }
+    isAuthenticated ? router.push('/') : router.push('/login')
   }
 
   const checkIfUserIsLoggedIn = () => {
-    // Código para verificar si el usuario ya inició sesión
-    // Devolver true si el usuario ya inició sesión y false si no
-    return false
+    if(localStorage.getItem('sessionToken')){
+      return true
+    }else{
+      return false
+    }
   }
 
   const authenticateUser = async (email, password) => {
-   if(email && password){
     const emailRegex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i
-    if (emailRegex.test(email)) {
-     return true
+    const url = 'http://10.80.100.10:3001/api/log'
+    email = email.trim()
+    password = password.trim()
+
+    if (email && password) {
+      if (emailRegex.test(email)) {
+        let data = { mail: email, password: password }
+       return fetch(url, {
+          method: 'POST', 
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(res => res.json())
+          .then(response => {
+            if(response.content.status){
+              localStorage.setItem('sessionToken', response.content.token)
+              return true
+            }else{
+              SwalMessage(response.content.message, 'error')
+              return false
+            }
+          })
+          .catch(error => SwalMessage('Error del servidor'+error, 'error'))
+      } else {
+        SwalMessage('El formato del email es incorrecto', 'error')
+        return false
+      }
     } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'El formato del email es incorrecto',
-        showConfirmButton: false,
-        timer: 1500
-      })
+      SwalMessage('No puede haber campos vacios', 'error')
+      return false
     }
-   }else{
+  }
+
+  const SwalMessage = (msg, icon) => {
     Swal.fire({
-      icon: 'error',
-      title: 'No puede haber campos vacios',
+      icon: icon,
+      title: msg,
       showConfirmButton: false,
       timer: 1500
     })
-   }
   }
-
+  
   return (
-    <div style={{marginTop:'20px'}}>
-    <Grid container justifyContent="center">
-      <Grid item xs={12} sm={6} md={4}>
-        <Card>
-          <CardContent>
-            <h1>Iniciar sesión</h1>
-            <form onSubmit={handleSubmit}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    id="email"
-                    label="Email"
-                    variant="outlined"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    fullWidth
-                  />
+    <div style={{ marginTop: '20px' }}>
+      <Grid container justifyContent="center">
+        <Grid item xs={12} sm={6} md={4}>
+          <Card>
+            <CardContent>
+            <Typography variant="h4" noWrap>
+             Login
+            </Typography>
+              <form onSubmit={handleSubmit} style={{ marginTop: '20px' }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <TextField
+                      id="email"
+                      label="Email"
+                      variant="outlined"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      fullWidth
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      id="password"
+                      label="Contraseña"
+                      type="password"
+                      variant="outlined"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      fullWidth
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      fullWidth
+                    >
+                      Iniciar sesión
+                    </Button>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    id="password"
-                    label="Contraseña"
-                    type="password"
-                    variant="outlined"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    fullWidth
-                  >
-                    Iniciar sesión
-                  </Button>
-                </Grid>
-              </Grid>
-            </form>
-          </CardContent>
-        </Card>
+              </form>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
-    </Grid>
-  </div>
+    </div>
   )
 }
 
